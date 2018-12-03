@@ -4,6 +4,7 @@ reg cstate;//当前状态
 reg nstate;//下一状态
 
 reg test_en;
+reg test_en2;
    //wangyu test
 reg cal_en;//一幅32*32计算使能 1表示计算中 待修改
 reg cut_en;//32*32切割使能 1表示切割中
