@@ -4,7 +4,7 @@ module  test (
 	input           rst_n,
 	input           enable,
 	
-	
+	   
 	input           wr_req,
    input  [7:0]    gray_data_in,
    input  [14:0]   gray_data_addra,
