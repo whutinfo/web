@@ -1,4 +1,136 @@
-	 
+//测试模块   test123123123
+module  test (
+	input           clk,
+	input           rst_n,
+	input           enable,
+	
+	
+	input           wr_req,
+   input  [7:0]    gray_data_in,
+   input  [14:0]   gray_data_addra,
+//	input           vs,
+//	input           cv_de,
+
+	
+	//Image data has been processd
+//   output        pos1	
+	output  reg [9:0]   object1,
+	output  reg [9:0]   object2,
+	output  reg [9:0]   object3,
+	output  reg [9:0]   object4,
+	output  reg [9:0]   object5 
+	
+);
+begin
+	wr_req = 0 ;
+	gray_data_in =0 ;
+	gray_data_addra = 0 ;
+end
+//这里是实现相应的测试功能
+
+endmodule
+
+//实现数据读取
+module read_rom(
+	input clk,
+	input rst_n,
+	input rom_enable,
+	input [7:0] gray_image_in,
+	input [14:0] gray_addr_in,
+	output reg [9:0] data
+	)
+
+//这个是一个ram是预先设定的ram，其参数是需要在开始设定的
+gray_ram gray_ram_m0
+(
+      .clka     (clk),
+      .addra    (gray_data_addra),
+      .dina     (gray_data_in),
+      .wea      (wr_req & (~enable)),
+      .ena      (wr_req & (~enable)),
+      .addrb    (gray_addra1),
+      .clkb     (clk),
+      .enb      (1),
+      .doutb    (gray1)
+ );
+//窗口数据存储RAM
+gray_1024bit gray_1024bit_m0
+(
+      .clka     (clk),
+      .addra    (gray_in_addra),
+      .dina     (gray1),
+      .wea      (cut_en),
+      .ena      (cut_en),
+      .addrb    (gray_addra),
+      .clkb     (clk),
+      .enb      (1),
+      .doutb    (gray));
+}
+//这个是实现对数据的读取，而且一帧数据的读取
+always@(posedge clk or negedge rst_n)
+begin
+	if(!rst_n)
+		cut_cnt <= 11'd0;
+		cal_en  <= 1'd0;//表示开关信号，表示是否可以进行数据的读取
+	else if ((enable)&(~cal_en))
+		begin
+			if(cut_cnt < 1025) 
+				begin
+					cut_cnt = cal_cnt + 1;
+				end
+			else
+				begin//这里表示数据读取完毕，完成了一帧数据的读取
+					cal_en = 1;
+					cut_cnt = 0 ;
+				end
+
+		end
+	else
+		cut_cnt <= 0;
+end
+
+//行触发信号的实现
+always@(posedge clk or negedge rst_n)
+begin
+	if(!rst_n /*| (~start)*/)
+		begin
+			line_cnt <= 5'd0;
+		end
+	else
+	  if((col_cnt==26) & (addr_cnt == 1023))
+			begin
+				line_cnt <= line_cnt + 1;
+		end
+	  else
+			begin
+				line_cnt <= 5'd0;
+			end
+end
+
+
+
+
+module map_conv(
+   input           clk,
+	input           rst_n,
+	input           enable,
+	
+	
+	input           wr_req,
+   input  [7:0]    gray_data_in,
+   input  [14:0]   gray_data_addra,
+//	input           vs,
+//	input           cv_de,
+
+	
+	//Image data has been processd
+//   output        pos1	
+	output  reg [9:0]   object1,
+	output  reg [9:0]   object2,
+	output  reg [9:0]   object3,
+	output  reg [9:0]   object4,
+	output  reg [9:0]   object5 
+    );	 
 /////////////////////////////////////////////////////////////////////////////////////
 reg cstate;//当前状态
 reg nstate;//下一状态
@@ -126,17 +258,6 @@ wire [9:0] gray_addra;
 wire [7:0] gray;
 assign gray_addra = ((cut_cnt > 1) && (cut_cnt < 1025)) ? cut_cnt - 2 : 0 ;//窗口数据读取地址
 
-//窗口数据存储RAM
-gray_1024bit gray_1024bit_m0
-(
-      .clka     (clk),
-      .addra    (gray_in_addra),
-      .dina     (gray1),
-      .wea      (cut_en),
-      .ena      (cut_en),
-      .addrb    (gray_addra),
-      .clkb     (clk),
-      .enb      (1),
-      .doutb    (gray));
 
 //////////////////////////////////////////////////////////////////
+endmodule
